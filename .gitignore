@@ -1,5 +1,5 @@
 # ------------------------
-# Python cache and artifacts
+# Python bytecode and artifacts
 # ------------------------
 __pycache__/
 *.py[cod]
@@ -11,7 +11,7 @@ __pycache__/
 *.egg
 
 # ------------------------
-# Virtual environments
+# Virtual environments and env files
 # ------------------------
 venv/
 .env
@@ -21,12 +21,13 @@ venv/
 # Logs and runtime files
 # ------------------------
 *.log
+*.log.*
 *.pid
 *.gz
 *.tmp
 
 # ------------------------
-# Testing and coverage
+# Coverage, test and cache
 # ------------------------
 htmlcov/
 .tox/
@@ -38,7 +39,7 @@ htmlcov/
 .junit.xml
 
 # ------------------------
-# mypy, pylint, and linters
+# Static analysis / linters
 # ------------------------
 .mypy_cache/
 .dmypy.json
@@ -46,7 +47,7 @@ htmlcov/
 .pyre/
 
 # ------------------------
-# IDE/editor configs
+# IDE/editor configuration
 # ------------------------
 .vscode/
 .idea/
@@ -59,6 +60,7 @@ htmlcov/
 *.tar
 *.img
 *.bak
+docker-compose.override.yml
 
 # ------------------------
 # OS system files
@@ -66,3 +68,12 @@ htmlcov/
 .DS_Store
 Thumbs.db
 ehthumbs.db
+
+# ------------------------
+# Database backups and artifacts
+# ------------------------
+*.sqlite3
+*.db
+*.dump
+*.pgsql
+*.bak.sql
