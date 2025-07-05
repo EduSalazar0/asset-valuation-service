@@ -1,22 +1,20 @@
 version: "3.9"
 
 services:
-  # PostgreSQL Database Service
-  postgres:
+  postgres_valuation:
     image: postgres:15
-    container_name: asset_valuation_db
+    container_name: asset_valuation_db_pg
     environment:
-      POSTGRES_DB: asset_db
+      POSTGRES_DB: asset_valuation_db
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
     ports:
-      - "5432:5432"
+      - "5433:5432"  # Usa otro puerto si ya hay uno expuesto
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - postgres_data_asset_valuation:/var/lib/postgresql/data
     networks:
       - backend
 
-  # Kafka Broker (con Zookeeper para desarrollo local)
   zookeeper:
     image: confluentinc/cp-zookeeper:7.5.0
     container_name: zookeeper
@@ -43,13 +41,12 @@ services:
     networks:
       - backend
 
-  # Asset Valuation Microservice
   asset-valuation-service:
     build:
       context: .
     container_name: asset-valuation-service
     depends_on:
-      - postgres
+      - postgres_valuation
       - kafka
     env_file:
       - .env
@@ -58,7 +55,7 @@ services:
       - backend
 
 volumes:
-  postgres_data:
+  postgres_data_asset_valuation:
 
 networks:
   backend:
