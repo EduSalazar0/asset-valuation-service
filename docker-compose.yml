@@ -1,61 +1,77 @@
-version: "3.9"
-
 services:
-  postgres_valuation:
-    image: postgres:15
-    container_name: asset_valuation_db_pg
-    environment:
-      POSTGRES_DB: asset_valuation_db
-      POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-    ports:
-      - "5433:5432"  # Usa otro puerto si ya hay uno expuesto
-    volumes:
-      - postgres_data_asset_valuation:/var/lib/postgresql/data
-    networks:
-      - backend
-
   zookeeper:
-    image: confluentinc/cp-zookeeper:7.5.0
-    container_name: zookeeper
+    image: confluentinc/cp-zookeeper:7.3.0
+    container_name: zookeeper_valuation
+    networks: # <--- CORRECCIÓN: Añadido a la red backend
+      - backend
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
     ports:
       - "2181:2181"
-    networks:
-      - backend
 
   kafka:
-    image: confluentinc/cp-kafka:7.5.0
-    container_name: kafka
+    image: confluentinc/cp-kafka:7.3.0
+    container_name: kafka_valuation
+    networks: # <--- CORRECCIÓN: Añadido a la red backend
+      - backend
     depends_on:
       - zookeeper
     ports:
       - "9092:9092"
+      - "29092:29092"
     environment:
       KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_ZOOKEEPER_CONNECT: 'zookeeper:2181'
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+
+  postgres_asset_db:
+    image: postgres:15-alpine
+    container_name: postgres_asset_db_valuation
+    hostname: postgres_valuation
     networks:
       - backend
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "GaBR1302cm#$"
+      POSTGRES_DB: asset_db
+    volumes:
+      - postgres_asset_data:/var/lib/postgresql/data # <--- CORRECCIÓN: El nombre ahora coincide con el volumen de abajo
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d asset_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
 
   asset-valuation-service:
-    build:
-      context: .
-    container_name: asset-valuation-service
+    build: .
+    container_name: asset_valuation_service
+    networks: # <--- CORRECCIÓN: Añadido a la red backend
+      - backend
     depends_on:
-      - postgres_valuation
-      - kafka
+      postgres_asset_db: # <--- CORRECCIÓN: El nombre del servicio ahora es el correcto
+        condition: service_healthy
+      kafka:
+        condition: service_started
     env_file:
       - .env
+    volumes:
+      - .:/app
     restart: on-failure
-    networks:
-      - backend
 
+# --- CORRECCIÓN: Se define el volumen con el nombre correcto ---
 volumes:
-  postgres_data_asset_valuation:
+  postgres_asset_data:
 
+# --- CORRECCIÓN: Se define la red para que todos los servicios puedan usarla ---
 networks:
   backend:
+    driver: bridge
