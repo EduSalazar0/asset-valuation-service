@@ -36,3 +36,11 @@ This service is a "headless" worker with no API. It adheres to **Clean Architect
 ## Getting Started
 
 Follow the standard procedure: clone, create a virtual environment, install dependencies from `requirements.txt`, configure your `.env` file, and run `python main.py`.
+
+## Disclaimer
+
+This service is intended solely for educational and research purposes within authorized environments. It must **not** be used against systems, networks, or digital assets without explicit permission from their owners.
+
+The valuation logic applied in this microservice is based on heuristic assumptions and simplified models; therefore, it should **not** be considered a substitute for a comprehensive risk assessment conducted by certified professionals.
+
+Users are fully responsible for any consequences arising from improper or unauthorized use. Always adhere to ethical principles and local cybersecurity laws when deploying or modifying this tool.
